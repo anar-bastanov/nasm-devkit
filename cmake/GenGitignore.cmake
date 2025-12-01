@@ -1,15 +1,15 @@
 # Inputs:
 #   - DEPS_FILE  : path with one active dependency name per line
-#   - OUT        : destination file path (lib/.gitignore)
+#   - OUT        : destination file path to lib/.gitignore
 #   - LIB_DIR    : absolute path to lib/
-#   - DEV_ACTIVE : optional bool (preferred) - ON/OFF effective dev mode
-#   - REPO_ROOT  : optional path to repo root (for git prune/add)
+#   - DEV_ACTIVE : optional bool - ON/OFF effective dev mode
+#   - REPO_ROOT  : optional path to repo root for git prune/add
 
 if(NOT DEFINED DEPS_FILE OR NOT DEFINED OUT OR NOT DEFINED LIB_DIR)
         message(FATAL_ERROR "GenGitignore.cmake: missing DEPS_FILE/OUT/LIB_DIR")
 endif()
 
-foreach(_k DEPS_FILE OUT LIB_DIR DEV_MARKER REPO_ROOT)
+foreach(_k DEPS_FILE OUT LIB_DIR REPO_ROOT)
     if(DEFINED ${_k})
         string(REGEX REPLACE "^\"|\"$" "" ${_k} "${${_k}}")
     endif()
