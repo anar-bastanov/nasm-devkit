@@ -4,15 +4,21 @@ This document explains how to start your own project with the DevKit.
 
 ## 0. Requirements
 
-* CMake version 3.20 or newer
-* NASM version 2.15 or newer
-* A C/C++ toolchain:
+You need the following tools:
 
-  * Windows: Visual Studio 2019/2022 (Build Tools or full VS), or LLVM/MinGW with Ninja
-  * Linux / macOS: gcc or clang, with make or ninja
+* CMake 3.20 or newer
+* NASM 2.15 or newer
+* A C/C++ toolchain
+
+  * Windows:
+    * Visual Studio with C++ build tools (any recent version), or
+    * MinGW / LLVM toolchain plus a build tool (Ninja or Make)
+  * Linux / macOS:
+    * Compiler: gcc or clang
+    * Build tool: Ninja or Make
 * Git (optional, but recommended)
 
-All tools should be installed and accessible from your shell (`PATH`).
+All tools should be available on your `PATH`.
 
 ## 1. Create a project
 
@@ -33,20 +39,18 @@ You can begin in three ways:
 
 ## 2. Set project name
 
-Run the bootstrap script to configure project and executable names:
+Run the bootstrap script **once** to set the project and, optionally, executable names.
 
 * **Windows (PowerShell)**
 
   ```powershell
-  ./tools/bootstrap.ps1 -Project MyApp
   ./tools/bootstrap.ps1 -Project MyApp -Executable myapp-cli
   ```
 
 * **Linux / macOS**
 
   ```bash
-  ./tools/bootstrap.sh MyApp
-  ./tools/bootstrap.sh MyApp myapp-cli  # custom executable name
+  ./tools/bootstrap.sh MyApp myapp-cli
   ```
 
 This updates the placeholders in `CMakeLists.txt`:
@@ -133,7 +137,7 @@ git commit -m "Bootstrap project."
 
 ## 6. Add your code
 
-In `/src/` you will find two starting files:
+In `src/` you will find two starting files:
 
 * **`main.nasm`:** the reserved runtime entrypoint. It sets up the environment, collects arguments, and transfers control to your program.
 
@@ -157,7 +161,7 @@ argparse
 styling
 ```
 
-* Each library lives under `/lib/<name>/`.
+* Each library lives under `lib/<name>/`.
 * Libraries may declare their own `dependencies.list`.
 * You can remove or add libraries freely.
 
