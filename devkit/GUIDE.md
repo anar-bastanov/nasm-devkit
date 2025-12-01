@@ -58,30 +58,72 @@ set(EXECUTABLE_NAME_VAR "myapp-cli")
 
 ## 3. Build
 
-Create a directory named `build`, then run:
-
-```bash
-cmake -S . -B build
-cmake --build build --config Debug
-```
-
-**Build types**
+You can choose one of the available build types:
 
 * **Debug** (default): debug symbols, no optimizations
 * **Release**: full optimizations, stripped binary
 * **RelWithDebInfo**: optimized but keeps debug info
 * **MinSizeRel**: optimized for size
 
-Binaries are placed in `build/bin/<CONFIG>/`, for example:
+Use one of the recipes below depending on your generator and toolchain.
+
+### 3.1. Windows with Visual Studio (multi-config)
 
 ```bash
-./build/bin/Debug/myapp-cli
+cmake -S . -B build  # VS is usually the default generator on Windows
+cmake --build build --config Debug  # build/bin/Debug/myapp-cli.exe
+cmake --build build --config Release  # build/bin/Release/myapp-cli.exe
+```
+
+### 3.2. Ninja (recommended on all platforms)
+
+**Debug:**
+
+```bash
+cmake -S . -B build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug  # build-debug/bin/myapp-cli
+```
+
+**Release:**
+
+```bash
+cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release  # build-release/bin/myapp-cli
+```
+
+### 3.3. Windows with MinGW Makefiles
+
+**Debug:**
+
+```bash
+cmake -S . -B build-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug  # build-debug/bin/myapp-cli.exe
+```
+
+**Release:**
+
+```bash
+cmake -S . -B build-release -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release  # build-release/bin/myapp-cli.exe
+```
+
+## 4. Test
+
+Running the binary from your chosen build directory should print a hello message:
+
+```none
+# Example: Ninja Debug build
+./build-debug/bin/myapp-cli
+Hello, World!
+
+# Example: Visual Studio Debug build
+./build/bin/Debug/myapp-cli.exe
 Hello, World!
 ```
 
-## 4. Initialize Git
+## 5. Initialize Git
 
-> Run this **after** your first build; else, you will commit all library source files, not just the ones you use.
+Run this **after** your first build; else, you will commit all library source files, not just the ones you use.
 
 ```bash
 git init
@@ -89,7 +131,7 @@ git add .
 git commit -m "Bootstrap project."
 ```
 
-## 5. Add your code
+## 6. Add your code
 
 In `/src/` you will find two starting files:
 
@@ -105,7 +147,7 @@ In `/src/` you will find two starting files:
 
 Headers can be placed anywhere, but by default live in `src/include/`.
 
-## 6. Manage dependencies
+## 7. Manage dependencies
 
 Declare dependencies in `src/dependencies.list`:
 
@@ -124,8 +166,8 @@ styling
 >
 > The libraries under `lib/` are a work in progress and currently lack documentation, expect changes in future updates.
 
-## 7. Next steps
+## 8. Next steps
 
-* Follow [CALLING\_CONVENTION.md](CALLING_CONVENTION.md) for the `__anrc64` spec.
+* Follow [CALLING_CONVENTION.md](CALLING_CONVENTION.md) for the `__anrc64` spec.
 * Keep `/devkit/` and the root `NOTICE` file intact.
 * Add your own project README, LICENSE, and .gitignore at the repository root.

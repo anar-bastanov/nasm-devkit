@@ -17,10 +17,21 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # ------- options -------
 option(DEV_MODE "Do not ignore lib/ content in .gitignore" OFF)
 
-# ------- default build type -------
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+# ------- configs & build type -------
+if(CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Generator: ${CMAKE_GENERATOR} (multi-config)")
+    message(STATUS "Available configs: ${CMAKE_CONFIGURATION_TYPES}")
+else()
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+    endif()
+
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+        "Debug" "Release" "RelWithDebInfo" "MinSizeRel"
+    )
+
+    message(STATUS "Generator: ${CMAKE_GENERATOR} (single-config)")
+    message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
@@ -333,9 +344,18 @@ message(STATUS "NASM include edges tracked: ${_total_nasm_edges}")
 add_executable(${EXECUTABLE_NAME_VAR} ${C_SOURCES} ${CPP_SOURCES} ${ASM_SOURCES})
 add_dependencies(${EXECUTABLE_NAME_VAR} sync_nasm_includes update_gitignore)
 
-set_target_properties(${EXECUTABLE_NAME_VAR} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>"
-)
+if(CMAKE_CONFIGURATION_TYPES)
+    set_target_properties(${EXECUTABLE_NAME_VAR} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_BINARY_DIR}/bin/Debug"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${CMAKE_BINARY_DIR}/bin/Release"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin/RelWithDebInfo"
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_BINARY_DIR}/bin/MinSizeRel"
+    )
+else()
+    set_target_properties(${EXECUTABLE_NAME_VAR} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+endif()
 
 if(NOT MSVC)
   target_link_libraries(${EXECUTABLE_NAME_VAR} PRIVATE m)
@@ -359,33 +379,43 @@ endif()
 # ------- optimizations & per-config flags -------
 if(MSVC)
     target_compile_definitions(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<CONFIG:Debug>:DEBUG>
-      $<$<CONFIG:Release>:NDEBUG>
+        $<$<CONFIG:Debug>:DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
     )
 
     target_compile_options(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C,CXX>>:/Zi /Od>
-      $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C,CXX>>:/O2 /Gy>
+        $<$<AND:$<CONFIG:Debug>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:/Od>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:/O2>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:/Gy>
     )
 
     target_link_options(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<CONFIG:Release>:/OPT:REF /OPT:ICF /INCREMENTAL:NO>
-      $<$<CONFIG:RelWithDebInfo>:/OPT:REF /OPT:ICF /INCREMENTAL:NO>
-      $<$<CONFIG:MinSizeRel>:/OPT:REF /OPT:ICF /INCREMENTAL:NO>
+        $<$<CONFIG:Release>:/OPT:REF>
+        $<$<CONFIG:Release>:/OPT:ICF>
+        $<$<CONFIG:Release>:/INCREMENTAL:NO>
+        $<$<CONFIG:RelWithDebInfo>:/OPT:REF>
+        $<$<CONFIG:RelWithDebInfo>:/OPT:ICF>
+        $<$<CONFIG:RelWithDebInfo>:/INCREMENTAL:NO>
+        $<$<CONFIG:MinSizeRel>:/OPT:REF>
+        $<$<CONFIG:MinSizeRel>:/OPT:ICF>
+        $<$<CONFIG:MinSizeRel>:/INCREMENTAL:NO>
     )
 elseif(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_definitions(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<CONFIG:Debug>:DEBUG>
-      $<$<CONFIG:Release>:NDEBUG>
+        $<$<CONFIG:Debug>:DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
     )
 
     target_compile_options(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C,CXX>>:-O0 -g>
-      $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C,CXX>>:-O3 -ffunction-sections -fdata-sections>
+        $<$<AND:$<CONFIG:Debug>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:-O0>
+        $<$<AND:$<CONFIG:Debug>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:-g>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:-O3>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:-ffunction-sections>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>>:-fdata-sections>
     )
 
     target_link_options(${EXECUTABLE_NAME_VAR} PRIVATE
-      $<$<CONFIG:Release>:-Wl,--gc-sections -s>
+        $<$<CONFIG:Release>:-Wl,--gc-sections,-s>
     )
 endif()
 

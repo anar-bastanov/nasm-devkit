@@ -1,4 +1,4 @@
-; main.nasm: reserved runtime entry point.
+; main.nasm: Reserved runtime entry point.
 ; This intermediate step sets up the environment, collects arguments,
 ; and transfers control to the user program. Do not rename this file
 ; or the `main` symbol unless you are customizing the runtime.

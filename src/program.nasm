@@ -1,4 +1,4 @@
-; program.nasm: application entry point.
+; program.nasm: Application entry point.
 
 %include "anrc/all"
 %include "main.inc"
@@ -20,10 +20,10 @@ section .text
 ; * **PARAM `args`:** Program arguments.
 ; * **RETURNS:** Exit status.
 program_entry:
-    lea  r8, [rel hello_world_msg]
+    lea r8, [rel hello_world_msg]
     callclib 1, cc_printf
 
     ; Start coding here!
 
-    xor  eax, eax
+    xor eax, eax
     ret

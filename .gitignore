@@ -1,7 +1,14 @@
-# Replace this with a recommended .gitignore for your IDE/editor
+# IDE/editor-specific ignores:
+# Add entries here (or replace this section) using a template from:
+#   https://github.com/github/gitignore
 
-# Always ignore build artifacts
+# CMake build directories at repo root
 /build/
+/build-*/
+
+# In-source CMake build artifacts
 /CMakeFiles/
 /CMakeCache.txt
 /cmake_install.cmake
+/CTestTestfile.cmake
+/Makefile
